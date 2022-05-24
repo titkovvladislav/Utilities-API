@@ -10,7 +10,7 @@ module.exports.getWeather = async (req, res, next) => {
 
         if (!checkDate(weatherDb.currentWeather.now)){
             await Weather.deleteOne({ id: weatherDb.id });
-            await axios.get('https://api.weather.yandex.ru/v2/forecast', {
+            const response = await axios.get('https://api.weather.yandex.ru/v2/forecast', {
                 headers: {
                     "X-Yandex-API-Key": process.env.APIKeyWeather ,
                     'content-type': 'application/json'
@@ -20,23 +20,23 @@ module.exports.getWeather = async (req, res, next) => {
                     "lon": "40.093723",
                     "lang": "ru_RU"
                 }
-            }).then(response => {
-                const { now, fact } = response.data;
-                const id = uuidv4();
-                const weather = new Weather({
-                    currentWeather: {
-                        now,
-                        icon: fact.icon,
-                        temp: fact.temp,
-                        feels_like: fact.feels_like,
-                        condition: fact.condition
-                    },
-                    id
-                })
-                weather.save().then(result => res.json(result.currentWeather));
+            });
+
+            const { now, fact } = response.data;
+            const id = uuidv4();
+            const weather = new Weather({
+                currentWeather: {
+                    now,
+                    icon: fact.icon,
+                    temp: fact.temp,
+                    feels_like: fact.feels_like,
+                    condition: fact.condition
+                },
+                id
             })
+            return weather.save().then(result => res.json(result.currentWeather));
         }
-        res.send(weatherDb.currentWeather);
+        return res.send(weatherDb.currentWeather);
     } catch (e) {
         console.log(e);
         return res.status(422).send('Error! Params not correct');
