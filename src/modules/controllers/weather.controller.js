@@ -10,7 +10,7 @@ module.exports.getWeather = async (req, res, next) => {
 
         if (!checkDate(weatherDb.currentWeather.now)){
             await Weather.deleteOne({ id: weatherDb.id });
-            const response = await axios.get('https://api.weather.yandex.ru/v2/forecast', {
+            const response = await axios.get('https://api.weather.yandex.ru/v2/informers', {
                 headers: {
                     "X-Yandex-API-Key": process.env.APIKeyWeather ,
                     'content-type': 'application/json'
@@ -33,7 +33,7 @@ module.exports.getWeather = async (req, res, next) => {
                     condition: fact.condition
                 },
                 id
-            })
+            });
             return weather.save().then(result => res.json(result.currentWeather));
         }
         return res.send(weatherDb.currentWeather);
